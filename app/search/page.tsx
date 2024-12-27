@@ -56,6 +56,7 @@ const Search: FC = () => {
         });
         setResults(finalResult);
         setLoad(false);
+        console.log(finalResult[0]);
       }
     } catch (error:any) {
       setLoad(false);

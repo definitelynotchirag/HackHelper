@@ -1,4 +1,4 @@
-// - RESULTS
+// - BOOKMARKS
 // 	- id: string;
 // 	- name: string;
 // 	- desc: string;
@@ -16,7 +16,7 @@
 
 import mongoose from "mongoose";
 
-const resultSchema = new mongoose.Schema({
+const bookmarkSchema = new mongoose.Schema({
     name: { type: String, required: true },
     desc: { type: String, required: true },
     project_id : { type: mongoose.Schema.Types.ObjectId, ref: "Project" },
@@ -33,6 +33,6 @@ const resultSchema = new mongoose.Schema({
     topics: { type: Array, required: true }
 });
 
-const Result = mongoose.models.Result ||  mongoose.model("Result", resultSchema);
+const Bookmark = mongoose.models.Bookmark ||  mongoose.model("Bookmark", bookmarkSchema);
 
-export default Result;
+export default Bookmark;

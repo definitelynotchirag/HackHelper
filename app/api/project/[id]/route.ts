@@ -4,6 +4,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { converttoObjectId } from "@/lib/utils";
 import mongoose from "mongoose";
 import User from "@/models/user";
+import dbConnect from "@/lib/db";
 
 // get project info
 export const GET = async (
@@ -11,6 +12,7 @@ export const GET = async (
   res: NextResponse,
   { params }: { params: Promise<{ id: string }> }
 ) => {
+  dbConnect();
   const { id } = await params;
   try {
     const project = await Project.findById(id);
@@ -24,10 +26,11 @@ export const GET = async (
 };
 
 // add user to project
-export async function POST(
+export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  dbConnect();
   try {
     const { userid } = await req.json();
     const { id } = await params;
@@ -69,20 +72,18 @@ export async function POST(
   }
 }
 
-export const DELETE = async (
-  req: NextRequest,
-  res: NextResponse,
-  { params }: { params: Promise<{ id: string }> }
-) => {
-  // const { id } = await params;
+export const DELETE = async (req: NextRequest, res: NextResponse) => {
+  dbConnect();
   const { userid, project_id } = await req.json();
   const id = project_id;
+  console.log(id);
   const currentuser = await currentUser();
-  const mongouser = await User.findOne({ clerkUserId: currentuser.id });
-  const currentuserid = mongouser?._id;
+  const currentuserid = currentuser?.id;
   try {
     const project = await Project.findById(id);
-    if (currentuserid.toString() !== project.owner.toString()) {
+    const owner = await User.findOne({ _id: project.owner });
+    const ownerclerkid = owner?.clerkUserId;
+    if (currentuserid.toString() !== ownerclerkid.toString()) {
       return NextResponse.json(
         { message: "You are not authorized to perform this action" },
         { status: 401 }
@@ -100,6 +101,7 @@ export const DELETE = async (
       { status: 200 }
     );
   } catch (err) {
+    console.error("Error removing user from project:", err);
     return NextResponse.json(
       { message: "Removing user from project failed" },
       { status: 500 }
